@@ -2,7 +2,7 @@ import logging
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, ContextTypes
 
-from database import init_db, add_user, get_all_users
+from database import init_db, add_user, get_users
 from config import BOT_TOKEN
 
 logging.basicConfig(level=logging.INFO)
@@ -17,7 +17,8 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 
 async def dump_users(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    users = get_all_users()
+    chat_id = update.effective_chat.id
+    users = get_users(chat_id)
     if not users:
         await update.message.reply_text("Пока что нет сохраненных пользователей.")
         return
@@ -30,7 +31,7 @@ async def handle_new_members(update: Update, context: ContextTypes.DEFAULT_TYPE)
     if not update.message.new_chat_members:
         return
     for member in update.message.new_chat_members:
-        add_user(member.id, member.username)
+        add_user(update.effective_chat.id, member.id, member.username)
         logger.info("Saved user %s (%s)", member.id, member.username)
 
 
