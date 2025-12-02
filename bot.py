@@ -34,8 +34,10 @@ async def handle_new_members(update: Update, context: ContextTypes.DEFAULT_TYPE)
         logger.info("Saved user %s (%s)", member.id, member.username)
 
 
-async def main() -> None:
+def main() -> None:
+    """Запуск бота (синхронный, управляет event loop внутри run_polling)."""
     init_db()
+
     app = ApplicationBuilder().token(BOT_TOKEN).build()
 
     app.add_handler(CommandHandler("start", start))
@@ -43,10 +45,8 @@ async def main() -> None:
     app.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS, handle_new_members))
 
     logger.info("Bot started.")
-    await app.run_polling()
+    app.run_polling()
 
 
 if __name__ == "__main__":
-    import asyncio
-
-    asyncio.run(main())
+    main()
