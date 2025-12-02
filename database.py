@@ -20,6 +20,17 @@ def init_db() -> None:
                 """
             )
 
+            # Миграция старых схем без поля chat_id
+            cur = conn.execute("PRAGMA table_info(users)")
+            columns = [row[1] for row in cur.fetchall()]
+            if "chat_id" not in columns:
+                conn.execute("ALTER TABLE users ADD COLUMN chat_id INTEGER")
+
+            # Уникальный индекс, если он отсутствует (для старых таблиц)
+            conn.execute(
+                "CREATE UNIQUE INDEX IF NOT EXISTS idx_users_chat_user ON users(chat_id, user_id)"
+            )
+
 
 def add_user(chat_id: int, user_id: int, username: str | None) -> None:
     """Insert user for given chat, ignoring duplicates."""
